@@ -28,9 +28,11 @@ import { triggerBase64Download } from 'react-base64-downloader';
 import {
   SVGRenderer,
 } from 'echarts/renderers';
+import { loadStripe } from '@stripe/stripe-js'
 echarts.use(
   [SVGRenderer]
 );
+
 Amplify.configure(config)
 const client = generateClient();
 
@@ -38,6 +40,24 @@ var chart;
 
 const App = ({ signOut }) => {
   const [Stocks, setStocks] = useState([]);
+
+  async function handlePayment(event) {
+    event.preventDefault();
+    const stripe = await loadStripe(
+      'pk_test_51P3aBxAm2fIoFSNirajOED28MXTwchLL8hBG2GOq3zpRvXPEfGCmEmP6FbHovCUYt6CS3sH2tcftnxeDu5ysaGsL00WF32p6wK'
+    )
+    const { error } = await stripe.redirectToCheckout({
+      lineItems: [
+        {
+          price: 'price_1P3aRbAm2fIoFSNi3Osrl1iz',
+          quantity: 1
+        }
+      ],
+      mode: 'subscription',
+      successUrl: window.location.href,
+      cancelUrl: window.location.href
+    })
+  }
 
   async function fetchStocks(event) {
     // event.preventDefault();
@@ -192,6 +212,7 @@ const App = ({ signOut }) => {
       <Button onClick={signOut}>Sign Out</Button>
       <Button onClick={saveChart}>Save Chart</Button>
       <Button onClick={getUserChart}>Download My Charts</Button>
+      <Button onClick={handlePayment}>Payment</Button>
     </View>
   );
 };
